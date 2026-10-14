@@ -1,58 +1,25 @@
-import { useState } from 'react';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 
-function App() {
-  const [authType, setAuthType] = useState('login');
-
+export default function App() {
   return (
-    <div style={{ padding: '40px', fontFamily: 'sans-serif', textAlign: 'center' }}>
-      <h1>Work.ua/china</h1>
-      
-      <div style={{ margin: '20px 0' }}>
-        
-        <button onClick={() => setAuthType('login')} style={{ padding: '10px 20px', marginRight: '10px', cursor: 'pointer' }}>
-          Log in
-        </button>
+    <Router>
+      <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
 
-        <button onClick={() => setAuthType('register')} style={{ padding: '10px 20px', cursor: 'pointer' }}>
-          Registration
-        </button>
-
-      </div>
-
-      <div style={{ display: 'inline-block', padding: '20px', 
-        border: '1px solid #ddd', borderRadius: '8px', background: '#fff' }}>
-
-        {authType === 'login' ? (
-          <form onSubmit={(e) => e.preventDefault()} style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '280px' }}>
-
-            <h3>Log in</h3>
-
-            <input type="email" placeholder="Email" style={{ padding: '8px' }} />
-            <input type="password" placeholder="Password" style={{ padding: '8px' }} />
-
-            <button type="submit" style={{ padding: '10px', background: '#007bff', 
-              color: '#fff', border: 'none', cursor: 'pointer' }}>Log in</button>
-         
-          </form>
-
-        ) : (
-          <form onSubmit={(e) => e.preventDefault()} style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '280px' }}>
-
-            <h3>Registration</h3>
-
-            <input type="text" placeholder="Name" style={{ padding: '8px' }} />
-            <input type="email" placeholder="Email" style={{ padding: '8px' }} />
-            <input type="password" placeholder="Password" style={{ padding: '8px' }} />
-
-            <button type="submit" style={{ padding: '10px', background: '#28a745', 
-              color: '#fff', border: 'none', cursor: 'pointer' }}>Register</button>
+        <nav style={{ display: 'flex', gap: '20px', marginBottom: '20px', paddingBottom: '10px', borderBottom: '1px solid #ccc' }}>
           
-          </form>
-        )}
+          <Link to="/">Home</Link>
+          <Link to="/login">Log in</Link>
+          <Link to="/register">Register</Link>
+        </nav>
+
+        <Routes>
+          <Route path="/" element={<h2>Home Page (Teammate's section)</h2>} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+        </Routes>
       </div>
-    </div>
+    </Router>
   );
 }
-
-export default App;
