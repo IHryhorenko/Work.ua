@@ -1,5 +1,4 @@
-
-const API_URL = 'http://localhost:5000/api/auth';
+const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 
 async function request(endpoint, options = {}) {
   let response;
@@ -7,7 +6,8 @@ async function request(endpoint, options = {}) {
   try {
     response = await fetch(`${API_URL}${endpoint}`, {
       ...options,
-      credentials: 'include',
+      // Не використовуємо cookies, оскільки бекенд повертає JWT-токени.
+      // credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
@@ -38,55 +38,82 @@ async function request(endpoint, options = {}) {
 }
 
 export function login(email, password) {
-  return request('/login', {
+  return request('/Auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   });
 }
 
 export function register(email, password, role) {
-  return request('/register', {
+  if (role === 'employer') {
+    throw new Error(
+      'Employer registration requires company and personal details.'
+    );
+  }
+
+  return request('/Auth/register/candidate', {
     method: 'POST',
-    body: JSON.stringify({ email, password, role }),
+    body: JSON.stringify({
+      email,
+      password,
+      firstName: '',
+      lastName: '',
+    }),
   });
 }
 
 export function forgotPassword(email) {
-  return request('/forgot-password', {
+  return request('/Auth/forgot-password', {
     method: 'POST',
     body: JSON.stringify({ email }),
   });
 }
 
 export function resetPassword(token, password) {
-  return request('/reset-password', {
+  return request('/Auth/reset-password', {
     method: 'POST',
-    body: JSON.stringify({ token, password }),
+    body: JSON.stringify({
+      token,
+      newPassword: password,
+    }),
   });
 }
 
 export function verifyEmail(token) {
-  return request('/verify-email', {
-    method: 'POST',
-    body: JSON.stringify({ token }),
-  });
+  return Promise.reject(
+    new Error('Email verification is not implemented in the backend.')
+  );
 }
 
 export function resendVerification(email) {
-  return request('/resend-verification', {
-    method: 'POST',
-    body: JSON.stringify({ email }),
-  });
+  return Promise.reject(
+    new Error('Resending verification is not implemented in the backend.')
+  );
 }
 
 export function getCurrentUser() {
-  return request('/me', {
+  const token = localStorage.getItem('accessToken');
+
+  return request('/Account/me', {
     method: 'GET',
+    headers: token
+      ? { Authorization: `Bearer ${token}` }
+      : {},
   });
 }
 
-export function logout() {
-  return request('/logout', {
-    method: 'POST',
-  });
+export async function logout() {
+  const refreshToken = localStorage.getItem('refreshToken');
+
+  try {
+    if (refreshToken) {
+      await request('/Auth/logout', {
+        method: 'POST',
+        body: JSON.stringify({ refreshToken }),
+      });
+    }
+  } finally {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+  }
 }
