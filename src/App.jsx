@@ -13,6 +13,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
 import ProfilePage from './pages/ProfilePage';
+import EmployerCabinet from './pages/EmployerCabinet';
 
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -22,6 +23,7 @@ function DashboardPage() {
       <h1>Work.ua</h1>
       <p>You are viewing the protected area.</p>
       <p><Link to="/profile">Мій профіль</Link></p>
+      <p><Link to="/employer">Кабінет роботодавця</Link></p>
     </main>
   );
 }
@@ -49,6 +51,7 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/employer" element={<EmployerCabinet />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />
