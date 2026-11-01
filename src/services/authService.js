@@ -1,17 +1,23 @@
 const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 
 async function request(endpoint, options = {}) {
+  const token = localStorage.getItem('accessToken');
+
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+
+  if (token && !headers.Authorization) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   let response;
 
   try {
     response = await fetch(`${API_URL}${endpoint}`, {
       ...options,
-      // Не використовуємо cookies, оскільки бекенд повертає JWT-токени.
-      // credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
     });
   } catch {
     throw new Error('Unable to connect to the server.');
@@ -37,31 +43,65 @@ async function request(endpoint, options = {}) {
   return data;
 }
 
-export function login(email, password) {
-  return request('/Auth/login', {
+// Збереження токенів після авторизації
+function saveTokens(data) {
+  if (data?.accessToken) {
+    localStorage.setItem('accessToken', data.accessToken);
+  }
+
+  if (data?.refreshToken) {
+    localStorage.setItem('refreshToken', data.refreshToken);
+  }
+}
+
+// Вхід
+export async function login(email, password) {
+  const data = await request('/Auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   });
+
+  saveTokens(data);
+
+  return data;
 }
 
-export function register(email, password, role) {
-  if (role === 'employer') {
-    throw new Error(
-      'Employer registration requires company and personal details.'
-    );
-  }
+// Реєстрація
+export async function register(email, password, role, details = {}) {
+  const isEmployer = role === 'employer';
 
-  return request('/Auth/register/candidate', {
+  const endpoint = isEmployer
+    ? '/Auth/register/employer'
+    : '/Auth/register/candidate';
+
+  const body = isEmployer
+    ? {
+        email,
+        password,
+        firstName: details.firstName,
+        lastName: details.lastName,
+        companyName: details.companyName,
+        companyWebsite: details.companyWebsite || '',
+        companyDescription: details.companyDescription || '',
+      }
+    : {
+        email,
+        password,
+        firstName: details.firstName,
+        lastName: details.lastName,
+      };
+
+  const data = await request(endpoint, {
     method: 'POST',
-    body: JSON.stringify({
-      email,
-      password,
-      firstName: '',
-      lastName: '',
-    }),
+    body: JSON.stringify(body),
   });
+
+  saveTokens(data);
+
+  return data;
 }
 
+// Забули пароль
 export function forgotPassword(email) {
   return request('/Auth/forgot-password', {
     method: 'POST',
@@ -69,6 +109,7 @@ export function forgotPassword(email) {
   });
 }
 
+// Скидання пароля
 export function resetPassword(token, password) {
   return request('/Auth/reset-password', {
     method: 'POST',
@@ -79,29 +120,14 @@ export function resetPassword(token, password) {
   });
 }
 
-export function verifyEmail(token) {
-  return Promise.reject(
-    new Error('Email verification is not implemented in the backend.')
-  );
-}
-
-export function resendVerification(email) {
-  return Promise.reject(
-    new Error('Resending verification is not implemented in the backend.')
-  );
-}
-
+// Отримання поточного користувача
 export function getCurrentUser() {
-  const token = localStorage.getItem('accessToken');
-
   return request('/Account/me', {
     method: 'GET',
-    headers: token
-      ? { Authorization: `Bearer ${token}` }
-      : {},
   });
 }
 
+// Вихід
 export async function logout() {
   const refreshToken = localStorage.getItem('refreshToken');
 
@@ -116,4 +142,16 @@ export async function logout() {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
   }
+}
+
+export function verifyEmail() {
+  return Promise.reject(
+    new Error('Email verification is not implemented in the backend.')
+  );
+}
+
+export function resendVerification() {
+  return Promise.reject(
+    new Error('Email verification is not implemented in the backend.')
+  );
 }
