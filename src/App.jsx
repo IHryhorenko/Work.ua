@@ -1,3 +1,4 @@
+
 import {
   BrowserRouter,
   Routes,
@@ -15,6 +16,10 @@ import AuthCallbackPage from './pages/AuthCallbackPage';
 import ProfilePage from './pages/ProfilePage';
 import EmployerCabinet from './pages/EmployerCabinet';
 
+import JobsPage from './pages/JobsPage';
+import VacancyPage from './pages/VacancyPage';
+import CreateVacancyPage from './pages/CreateVacancyPage';
+
 import ProtectedRoute from './components/ProtectedRoute';
 
 function DashboardPage() {
@@ -22,8 +27,11 @@ function DashboardPage() {
     <main className="dashboard-page">
       <h1>Work.ua</h1>
       <p>You are viewing the protected area.</p>
+
       <p><Link to="/profile">Мій профіль</Link></p>
       <p><Link to="/employer">Кабінет роботодавця</Link></p>
+      <p><Link to="/jobs">Переглянути вакансії</Link></p>
+      <p><Link to="/create-vacancy">Створити вакансію</Link></p>
     </main>
   );
 }
@@ -48,10 +56,14 @@ export default function App() {
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
+        <Route path="/jobs" element={<JobsPage />} />
+        <Route path="/jobs/:id" element={<VacancyPage />} />
+
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/employer" element={<EmployerCabinet />} />
+          <Route path="/create-vacancy" element={<CreateVacancyPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />
