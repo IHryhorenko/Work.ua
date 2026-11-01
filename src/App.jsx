@@ -1,10 +1,9 @@
-
 import {
   BrowserRouter,
   Routes,
   Route,
   Navigate,
-  Outlet,
+  Link,
 } from 'react-router-dom';
 
 import LoginPage from './pages/LoginPage';
@@ -14,15 +13,23 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
 import HomePage from './pages/HomePage';
+import ProfilePage from './pages/ProfilePage';
+
+import JobsPage from './pages/JobsPage';
+import VacancyPage from './pages/VacancyPage';
+import CreateVacancyPage from './pages/CreateVacancyPage';
 
 import ProtectedRoute from './components/ProtectedRoute';
 
 function DashboardPage() {
   return (
-    <div>
+    <main className="dashboard-page">
       <h1>Work.ua</h1>
       <p>You are viewing the protected area.</p>
-    </div>
+      <p><Link to="/profile">Мій профіль</Link></p>
+      <p><Link to="/jobs">Переглянути вакансії</Link></p>
+      <p><Link to="/create-vacancy">Створити вакансію</Link></p>
+    </main>
   );
 }
 
@@ -30,7 +37,7 @@ function NotFoundPage() {
   return (
     <div>
       <h2>404 - Page not found</h2>
-      <a href="/login">Back to login</a>
+      <Link to="/login">Back to login</Link>
     </div>
   );
 }
@@ -42,29 +49,18 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
-        <Route
-          path="/forgot-password"
-          element={<ForgotPasswordPage />}
-        />
-
-        <Route
-          path="/reset-password"
-          element={<ResetPasswordPage />}
-        />
-
-        <Route
-          path="/verify-email"
-          element={<VerifyEmailPage />}
-        />
-
-        <Route
-          path="/auth/callback"
-          element={<AuthCallbackPage />}
-        />
+        <Route path="/jobs" element={<JobsPage />} />
+        <Route path="/jobs/:id" element={<VacancyPage />} />
 
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<DashboardPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/create-vacancy" element={<CreateVacancyPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />
