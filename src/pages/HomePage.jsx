@@ -20,17 +20,29 @@ export default function HomePage() {
       params.set('city', city.trim());
     }
 
-    navigate(`/jobs?${params.toString()}`);
+    const searchParams = params.toString();
+
+    navigate(searchParams ? `/jobs?${searchParams}` : '/jobs');
   };
 
   return (
     <div>
       <header>
-        <h1>Work.ua</h1>
+        <h1 onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+          Work.ua
+        </h1>
 
         <nav>
           <button onClick={() => navigate('/')}>
             Головна
+          </button>
+
+          <button onClick={() => navigate('/profile')}>
+            Мій профіль
+          </button>
+
+          <button onClick={() => navigate('/create-vacancy')}>
+            Створити вакансію
           </button>
 
           <button onClick={() => navigate('/login')}>
@@ -45,7 +57,10 @@ export default function HomePage() {
 
       <main>
         <h2>Знайди роботу</h2>
-        <p>Шукай вакансії та знаходь нові можливості для кар'єри.</p>
+        
+        <p>
+          Шукай вакансії та знаходь нові можливості для кар'єри
+        </p>
 
         <form onSubmit={handleSearch}>
           <input
@@ -66,6 +81,10 @@ export default function HomePage() {
             Знайти вакансії
           </button>
         </form>
+
+        <button onClick={() => navigate('/jobs')}>
+          Переглянути всі вакансії
+        </button>
       </main>
     </div>
   );

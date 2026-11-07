@@ -37,7 +37,7 @@ function NotFoundPage() {
   return (
     <div>
       <h2>404 - Page not found</h2>
-      <Link to="/login">Back to login</Link>
+      <Link to="/">Back to HomePage</Link>
     </div>
   );
 }
@@ -45,26 +45,29 @@ function NotFoundPage() {
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/verify-email" element={<VerifyEmailPage />} />
-        <Route path="/auth/callback" element={<AuthCallbackPage />} />
+  <Routes>
+    {/* Публічні сторінки */}
+    <Route path="/" element={<HomePage />} />
+    <Route path="/login" element={<LoginPage />} />
+    <Route path="/register" element={<RegisterPage />} />
+    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+    <Route path="/reset-password" element={<ResetPasswordPage />} />
+    <Route path="/verify-email" element={<VerifyEmailPage />} />
+    <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
-        <Route path="/jobs" element={<JobsPage />} />
-        <Route path="/jobs/:id" element={<VacancyPage />} />
+    {/* Вакансії */}
+    <Route path="/jobs" element={<JobsPage />} />
+    <Route path="/jobs/:id" element={<VacancyPage />} />
 
-        <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/create-vacancy" element={<CreateVacancyPage />} />
-        </Route>
+    {/* Захищені сторінки */}
+    <Route element={<ProtectedRoute />}>
+      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/profile" element={<ProfilePage />} />
+      <Route path="/create-vacancy" element={<CreateVacancyPage />} />
+    </Route>
 
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </BrowserRouter>
+    <Route path="*" element={<NotFoundPage />} />
+  </Routes>
+</BrowserRouter>
   );
 }
