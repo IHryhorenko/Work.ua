@@ -1,47 +1,4 @@
-const API_URL = `${import.meta.env.VITE_API_URL}/api`;
-
-async function request(endpoint, options = {}) {
-  const token = localStorage.getItem('accessToken');
-
-  const headers = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
-
-  if (token && !headers.Authorization) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
-  let response;
-
-  try {
-    response = await fetch(`${API_URL}${endpoint}`, {
-      ...options,
-      headers,
-    });
-  } catch {
-    throw new Error('Unable to connect to the server.');
-  }
-
-  const text = await response.text();
-  let data = null;
-
-  if (text) {
-    try {
-      data = JSON.parse(text);
-    } catch {
-      data = { message: text };
-    }
-  }
-
-  if (!response.ok) {
-    throw new Error(
-      data?.message || data?.error || 'Something went wrong.'
-    );
-  }
-
-  return data;
-}
+import { apiRequest } from './api';
 
 // Збереження токенів після авторизації
 function saveTokens(data) {
@@ -56,7 +13,7 @@ function saveTokens(data) {
 
 // Вхід
 export async function login(email, password) {
-  const data = await request('/Auth/login', {
+  const data = await apiRequest('/Auth/login', {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   });
@@ -91,7 +48,7 @@ export async function register(email, password, role, details = {}) {
         lastName: details.lastName,
       };
 
-  const data = await request(endpoint, {
+  const data = await apiRequest(endpoint, {
     method: 'POST',
     body: JSON.stringify(body),
   });
@@ -103,7 +60,7 @@ export async function register(email, password, role, details = {}) {
 
 // Забули пароль
 export function forgotPassword(email) {
-  return request('/Auth/forgot-password', {
+  return apiRequest('/Auth/forgot-password', {
     method: 'POST',
     body: JSON.stringify({ email }),
   });
@@ -111,7 +68,7 @@ export function forgotPassword(email) {
 
 // Скидання пароля
 export function resetPassword(token, password) {
-  return request('/Auth/reset-password', {
+  return apiRequest('/Auth/reset-password', {
     method: 'POST',
     body: JSON.stringify({
       token,
@@ -122,7 +79,7 @@ export function resetPassword(token, password) {
 
 // Отримання поточного користувача
 export function getCurrentUser() {
-  return request('/Account/me', {
+  return apiRequest('/Account/me', {
     method: 'GET',
   });
 }
@@ -133,7 +90,7 @@ export async function logout() {
 
   try {
     if (refreshToken) {
-      await request('/Auth/logout', {
+      await apiRequest('/Auth/logout', {
         method: 'POST',
         body: JSON.stringify({ refreshToken }),
       });
@@ -144,12 +101,14 @@ export async function logout() {
   }
 }
 
+// Підтвердження пошти
 export function verifyEmail() {
   return Promise.reject(
     new Error('Email verification is not implemented in the backend.')
   );
 }
 
+// Повторне надсилання листа
 export function resendVerification() {
   return Promise.reject(
     new Error('Email verification is not implemented in the backend.')

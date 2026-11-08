@@ -9,17 +9,15 @@ export default function VacancyCard({ vacancy }) {
         </Link>
       </h3>
 
-      <p><strong>{vacancy.company}</strong></p>
+      <p>
+        <strong>{vacancy.companyName}</strong>
+      </p>
+
       <p>{vacancy.city}</p>
-      <p>{vacancy.salary}</p>
 
-      <div>
-        <span>{vacancy.employment}</span>
-        {' · '}
-        <span>{vacancy.workFormat}</span>
-      </div>
-
-      <p>{vacancy.experience}</p>
+      {vacancy.description && (
+        <p>{vacancy.description}</p>
+      )}
 
       <Link to={`/jobs/${vacancy.id}`}>
         Переглянути вакансію

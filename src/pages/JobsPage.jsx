@@ -1,33 +1,140 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import VacancyCard from '../components/VacancyCard';
-import { getVacancies } from '../data/vacancies';
+import { getVacancies } from '../services/vacancyService';
 
 export default function JobsPage() {
-  const [vacancies] = useState(getVacancies);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [search, setSearch] = useState('');
-  const [city, setCity] = useState('');
-  const [category, setCategory] = useState('Усі');
-  const [workFormat, setWorkFormat] = useState('Усі');
+  const [search, setSearch] = useState(
+    searchParams.get('query') || ''
+  );
+  const [city, setCity] = useState(
+    searchParams.get('city') || ''
+  );
 
-  const filteredVacancies = vacancies.filter((vacancy) => {
-    const searchMatch =
-      vacancy.title.toLowerCase().includes(search.toLowerCase()) ||
-      vacancy.company.toLowerCase().includes(search.toLowerCase());
+  const [category, setCategory] = useState('');
+  const [workMode, setWorkMode] = useState('');
+  const [employmentType, setEmploymentType] = useState('');
+  const [experienceLevel, setExperienceLevel] = useState('');
+  const [salaryFrom, setSalaryFrom] = useState('');
+  const [currency, setCurrency] = useState('');
+  const [skills, setSkills] = useState('');
 
-    const cityMatch = vacancy.city
-      .toLowerCase()
-      .includes(city.toLowerCase());
+  const [sortBy, setSortBy] = useState('0');
+  const [desc, setDesc] = useState('true');
 
-    const categoryMatch =
-      category === 'Усі' || vacancy.category === category;
+  const [vacancies, setVacancies] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
 
-    const formatMatch =
-      workFormat === 'Усі' || vacancy.workFormat === workFormat;
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-    return searchMatch && cityMatch && categoryMatch && formatMatch;
-  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Синхронізація форми з URL
+  useEffect(() => {
+    setSearch(searchParams.get('query') || '');
+    setCity(searchParams.get('city') || '');
+    setPage(1);
+  }, [searchParams]);
+
+  // Завантаження вакансій
+  useEffect(() => {
+    async function loadVacancies() {
+      setLoading(true);
+      setError('');
+
+      try {
+        const data = await getVacancies({
+          search: searchParams.get('query') || '',
+          city: searchParams.get('city') || '',
+
+          category: searchParams.get('category') ?? '',
+          workMode: searchParams.get('workMode') ?? '',
+          employmentType: searchParams.get('employmentType') ?? '',
+          experienceLevel: searchParams.get('experienceLevel') ?? '',
+
+          salaryFrom: searchParams.get('salaryFrom') ?? '',
+          currency: searchParams.get('currency') ?? '',
+          skills: searchParams.get('skills') || '',
+
+          sortBy: searchParams.get('sortBy') ?? 0,
+          desc: searchParams.get('desc') !== 'false',
+
+          page,
+          pageSize: 10,
+        });
+
+        setVacancies(data?.items || []);
+        setTotalCount(data?.totalCount || 0);
+        setTotalPages(data?.totalPages || 1);
+      } catch (err) {
+        setError(err.message);
+        setVacancies([]);
+        setTotalCount(0);
+        setTotalPages(1);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadVacancies();
+  }, [searchParams, page]);
+
+  // Застосування фільтрів
+  const handleSearch = (e) => {
+    e.preventDefault();
+
+    const params = new URLSearchParams();
+
+    const filters = {
+      query: search.trim(),
+      city: city.trim(),
+      category,
+      workMode,
+      employmentType,
+      experienceLevel,
+      salaryFrom,
+      currency,
+      skills: skills.trim(),
+      sortBy,
+      desc,
+    };
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== '') {
+        params.set(key, value);
+      }
+    });
+
+    setPage(1);
+    setSearchParams(params);
+  };
+
+  // Скидання фільтрів
+  const handleReset = () => {
+    setSearch('');
+    setCity('');
+    setCategory('');
+    setWorkMode('');
+    setEmploymentType('');
+    setExperienceLevel('');
+    setSalaryFrom('');
+    setCurrency('');
+    setSkills('');
+    setSortBy('0');
+    setDesc('true');
+
+    setPage(1);
+    setSearchParams({});
+  };
+
+  // Перехід між сторінками
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
 
   return (
     <main className="page">
@@ -37,7 +144,9 @@ export default function JobsPage() {
         <Link to="/">На головну</Link>
       </p>
 
-      <div className="filters">
+      <form onSubmit={handleSearch} className="filters">
+
+        {/* Пошук за назвою та містом */}
         <input
           type="text"
           placeholder="Посада або компанія"
@@ -52,37 +161,190 @@ export default function JobsPage() {
           onChange={(e) => setCity(e.target.value)}
         />
 
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        >
-          <option>Усі</option>
-          <option>IT</option>
-          <option>Дизайн</option>
-          <option>Продажі</option>
-        </select>
+        {/* Категорія */}
+        <label>
+          Категорія
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option value="">Усі категорії</option>
+            <option value="0">IT</option>
+            <option value="1">Маркетинг</option>
+            <option value="2">Продажі</option>
+            <option value="3">Фінанси</option>
+            <option value="4">Дизайн</option>
+            <option value="5">Освіта</option>
+            <option value="6">Медицина</option>
+            <option value="7">Логістика</option>
+            <option value="8">Будівництво</option>
+            <option value="9">Сфера послуг</option>
+            <option value="10">Інше</option>
+          </select>
+        </label>
 
-        <select
-          value={workFormat}
-          onChange={(e) => setWorkFormat(e.target.value)}
-        >
-          <option>Усі</option>
-          <option>В офісі</option>
-          <option>Віддалено</option>
-          <option>Гібридно</option>
-        </select>
-      </div>
+        {/* Формат роботи */}
+        <label>
+          Формат роботи
+          <select
+            value={workMode}
+            onChange={(e) => setWorkMode(e.target.value)}
+          >
+            <option value="">Усі формати</option>
+            <option value="0">В офісі</option>
+            <option value="1">Віддалено</option>
+            <option value="2">Гібридно</option>
+          </select>
+        </label>
 
-      <h2>Знайдено вакансій: {filteredVacancies.length}</h2>
+        {/* Тип зайнятості */}
+        <label>
+          Тип зайнятості
+          <select
+            value={employmentType}
+            onChange={(e) => setEmploymentType(e.target.value)}
+          >
+            <option value="">Усі типи</option>
+            <option value="0">Повна зайнятість</option>
+            <option value="1">Часткова зайнятість</option>
+            <option value="2">Контракт</option>
+            <option value="3">Стажування</option>
+          </select>
+        </label>
 
-      {filteredVacancies.length > 0 ? (
-        <div className="vacancies-list">
-          {filteredVacancies.map((vacancy) => (
-            <VacancyCard key={vacancy.id} vacancy={vacancy} />
-          ))}
+        {/* Досвід */}
+        <label>
+          Досвід роботи
+          <select
+            value={experienceLevel}
+            onChange={(e) => setExperienceLevel(e.target.value)}
+          >
+            <option value="">Будь-який досвід</option>
+            <option value="0">Без досвіду</option>
+            <option value="1">Junior</option>
+            <option value="2">Middle</option>
+            <option value="3">Senior</option>
+            <option value="4">Lead</option>
+          </select>
+        </label>
+
+        {/* Зарплата */}
+        <label>
+          Мінімальна зарплата
+          <input
+            type="number"
+            min="0"
+            placeholder="Наприклад, 1000"
+            value={salaryFrom}
+            onChange={(e) => setSalaryFrom(e.target.value)}
+          />
+        </label>
+
+        {/* Валюта */}
+        <label>
+          Валюта
+          <select
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value)}
+          >
+            <option value="">Будь-яка валюта</option>
+            <option value="0">PLN</option>
+            <option value="1">UAH</option>
+            <option value="2">USD</option>
+            <option value="3">EUR</option>
+          </select>
+        </label>
+
+        {/* Навички */}
+        <label>
+          Навички
+          <input
+            type="text"
+            placeholder="React, JavaScript, SQL"
+            value={skills}
+            onChange={(e) => setSkills(e.target.value)}
+          />
+        </label>
+
+        {/* Сортування */}
+        <label>
+          Сортувати за
+          <select
+            value={`${sortBy}_${desc}`}
+            onChange={(e) => {
+              const [newSortBy, newDesc] = e.target.value.split('_');
+
+              setSortBy(newSortBy);
+              setDesc(newDesc);
+            }}
+          >
+            <option value="0_true">Найновіші</option>
+            <option value="0_false">Найстаріші</option>
+            <option value="1_true">Зарплата за спаданням</option>
+            <option value="1_false">Зарплата за зростанням</option>
+          </select>
+        </label>
+
+        <div>
+          <button type="submit">
+            Знайти
+          </button>
+
+          <button type="button" onClick={handleReset}>
+            Скинути фільтри
+          </button>
         </div>
+      </form>
+
+      {/* Результати */}
+      {loading ? (
+        <p>Завантаження вакансій...</p>
+      ) : error ? (
+        <p style={{ color: 'red' }}>{error}</p>
       ) : (
-        <p>Вакансій не знайдено</p>
+        <>
+          <h2>
+            Знайдено вакансій: {totalCount}
+          </h2>
+
+          {vacancies.length > 0 ? (
+            <div className="vacancies-list">
+              {vacancies.map((vacancy) => (
+                <VacancyCard
+                  key={vacancy.id}
+                  vacancy={vacancy}
+                />
+              ))}
+            </div>
+          ) : (
+            <p>Вакансій не знайдено</p>
+          )}
+
+          {/* Пагінація */}
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button
+                type="button"
+                onClick={() => handlePageChange(page - 1)}
+                disabled={page <= 1}
+              >
+                Попередня
+              </button>
+
+              <span>
+                Сторінка {page} з {totalPages}
+              </span>
+
+              <button
+                type="button"
+                onClick={() => handlePageChange(page + 1)}
+                disabled={page >= totalPages}
+              >
+                Наступна
+              </button>
+            </div>
+          )}
+        </>
       )}
     </main>
   );
