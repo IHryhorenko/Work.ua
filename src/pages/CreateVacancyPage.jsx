@@ -1,27 +1,29 @@
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getVacancies, saveVacancies } from '../data/vacancies';
+import { createVacancy } from '../services/vacancyService';
 
 export default function CreateVacancyPage() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
     title: '',
-    company: '',
-    city: '',
-    salary: '',
-    employment: 'Повна зайнятість',
-    workFormat: 'В офісі',
-    experience: 'Без досвіду',
-    category: 'IT',
     description: '',
-    responsibilities: '',
-    requirements: '',
-    conditions: '',
+    city: '',
+    salaryMin: '',
+    salaryMax: '',
+    currency: '0',
+    employmentType: '0',
+    workMode: '0',
+    category: '0',
+    experienceLevel: '0',
+    skills: '',
   });
 
-  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
+  // Оновлення значень форми
   function handleChange(e) {
     const { name, value } = e.target;
 
@@ -31,22 +33,59 @@ export default function CreateVacancyPage() {
     }));
   }
 
-  function handleSubmit(e) {
+  // Відправлення вакансії на сервер
+  async function handleSubmit(e) {
     e.preventDefault();
 
-    const vacancies = getVacancies();
+    setError('');
 
-    const newVacancy = {
-      ...form,
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
+    const vacancyData = {
+      title: form.title.trim(),
+      description: form.description.trim(),
+      city: form.city.trim(),
+
+      salaryMin: form.salaryMin === '' ? null : Number(form.salaryMin),
+      salaryMax: form.salaryMax === '' ? null : Number(form.salaryMax),
+
+      currency: Number(form.currency),
+      employmentType: Number(form.employmentType),
+      workMode: Number(form.workMode),
+      category: Number(form.category),
+      experienceLevel: Number(form.experienceLevel),
+
+      skills: form.skills
+        .split(',')
+        .map((skill) => skill.trim())
+        .filter((skill) => skill !== ''),
     };
 
-    saveVacancies([...vacancies, newVacancy]);
+    // Перевірка зарплати
+    if (
+      vacancyData.salaryMin !== null &&
+      vacancyData.salaryMax !== null &&
+      vacancyData.salaryMin > vacancyData.salaryMax
+    ) {
+      setError('Мінімальна зарплата не може бути більшою за максимальну.');
+      return;
+    }
 
-    setMessage('Вакансію створено.');
+    setLoading(true);
 
-    navigate(`/jobs/${newVacancy.id}`);
+    try {
+      const createdVacancy = await createVacancy(vacancyData);
+
+      // Перевірка отриманого ID
+      if (!createdVacancy?.id) {
+        throw new Error('Сервер не повернув ID створеної вакансії.');
+      }
+
+      // Перехід на сторінку створеної вакансії
+      navigate(`/jobs/${createdVacancy.id}`);
+    } catch (err) {
+      setError(err.message || 'Не вдалося створити вакансію.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -61,6 +100,7 @@ export default function CreateVacancyPage() {
         <label>
           Назва посади:
           <input
+            type="text"
             name="title"
             value={form.title}
             onChange={handleChange}
@@ -69,18 +109,9 @@ export default function CreateVacancyPage() {
         </label>
 
         <label>
-          Назва компанії:
-          <input
-            name="company"
-            value={form.company}
-            onChange={handleChange}
-            required
-          />
-        </label>
-
-        <label>
           Місто:
           <input
+            type="text"
             name="city"
             value={form.city}
             onChange={handleChange}
@@ -89,54 +120,79 @@ export default function CreateVacancyPage() {
         </label>
 
         <label>
-          Зарплата:
-          <input
-            name="salary"
-            value={form.salary}
+          Опис вакансії:
+          <textarea
+            name="description"
+            value={form.description}
             onChange={handleChange}
-            placeholder="Наприклад: 25000 грн"
+            onInput={handleChange}
             required
+            rows="6"
           />
+        </label>
+
+        <label>
+          Мінімальна зарплата:
+          <input
+            type="number"
+            name="salaryMin"
+            value={form.salaryMin}
+            onChange={handleChange}
+            min="0"
+            step="0.01"
+          />
+        </label>
+
+        <label>
+          Максимальна зарплата:
+          <input
+            type="number"
+            name="salaryMax"
+            value={form.salaryMax}
+            onChange={handleChange}
+            min="0"
+            step="0.01"
+          />
+        </label>
+
+        <label>
+          Валюта:
+          <select
+            name="currency"
+            value={form.currency}
+            onChange={handleChange}
+          >
+            <option value="0">PLN</option>
+            <option value="1">UAH</option>
+            <option value="2">USD</option>
+            <option value="3">EUR</option>
+          </select>
         </label>
 
         <label>
           Тип зайнятості:
           <select
-            name="employment"
-            value={form.employment}
+            name="employmentType"
+            value={form.employmentType}
             onChange={handleChange}
           >
-            <option>Повна зайнятість</option>
-            <option>Неповна зайнятість</option>
-            <option>Проєктна робота</option>
-            <option>Стажування</option>
+            <option value="0">Повна зайнятість</option>
+            <option value="1">Часткова зайнятість</option>
+            <option value="2">Контракт</option>
+            <option value="3">Стажування</option>
           </select>
         </label>
 
         <label>
           Формат роботи:
           <select
-            name="workFormat"
-            value={form.workFormat}
+            name="workMode"
+            value={form.workMode}
             onChange={handleChange}
           >
-            <option>В офісі</option>
-            <option>Віддалено</option>
-            <option>Гібридно</option>
-          </select>
-        </label>
-
-        <label>
-          Досвід:
-          <select
-            name="experience"
-            value={form.experience}
-            onChange={handleChange}
-          >
-            <option>Без досвіду</option>
-            <option>1–2 роки</option>
-            <option>2–5 років</option>
-            <option>Понад 5 років</option>
+            <option value="0">В офісі</option>
+            <option value="1">Віддалено</option>
+            <option value="2">Гібридно</option>
           </select>
         </label>
 
@@ -147,62 +203,52 @@ export default function CreateVacancyPage() {
             value={form.category}
             onChange={handleChange}
           >
-            <option>IT</option>
-            <option>Дизайн</option>
-            <option>Продажі</option>
-            <option>Маркетинг</option>
-            <option>Інше</option>
+            <option value="0">IT</option>
+            <option value="1">Маркетинг</option>
+            <option value="2">Продажі</option>
+            <option value="3">Фінанси</option>
+            <option value="4">Дизайн</option>
+            <option value="5">Освіта</option>
+            <option value="6">Медицина</option>
+            <option value="7">Логістика</option>
+            <option value="8">Будівництво</option>
+            <option value="9">Сфера послуг</option>
+            <option value="10">Інше</option>
           </select>
         </label>
 
         <label>
-          Опис вакансії:
-          <textarea
-            name="description"
-            value={form.description}
+          Досвід роботи:
+          <select
+            name="experienceLevel"
+            value={form.experienceLevel}
             onChange={handleChange}
-            required
-            rows="4"
-          />
+          >
+            <option value="0">Без досвіду</option>
+            <option value="1">Junior</option>
+            <option value="2">Middle</option>
+            <option value="3">Senior</option>
+            <option value="4">Lead</option>
+          </select>
         </label>
 
         <label>
-          Обов'язки:
-          <textarea
-            name="responsibilities"
-            value={form.responsibilities}
+          Навички:
+          <input
+            type="text"
+            name="skills"
+            value={form.skills}
             onChange={handleChange}
-            required
-            rows="4"
+            placeholder="Наприклад: C#, SQL, React"
           />
         </label>
 
-        <label>
-          Вимоги:
-          <textarea
-            name="requirements"
-            value={form.requirements}
-            onChange={handleChange}
-            required
-            rows="4"
-          />
-        </label>
+        {error && <p className="error-message">{error}</p>}
 
-        <label>
-          Умови роботи:
-          <textarea
-            name="conditions"
-            value={form.conditions}
-            onChange={handleChange}
-            required
-            rows="4"
-          />
-        </label>
-
-        <button type="submit">Створити вакансію</button>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Створення...' : 'Створити вакансію'}
+        </button>
       </form>
-
-      {message && <p>{message}</p>}
     </main>
   );
 }

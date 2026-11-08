@@ -1,36 +1,33 @@
+
 import { useState } from 'react';
+import { createApplication } from '../services/applicationService';
 
 export default function ApplicationForm({ vacancy }) {
-  const [resume, setResume] = useState('');
   const [coverLetter, setCoverLetter] = useState('');
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
-    const applications = JSON.parse(
-      localStorage.getItem('applications') || '[]'
-    );
+    setMessage('');
+    setError('');
+    setLoading(true);
 
-    const application = {
-      id: Date.now().toString(),
-      vacancyId: vacancy.id,
-      vacancyTitle: vacancy.title,
-      company: vacancy.company,
-      coverLetter,
-      status: 'Новий',
-      date: new Date().toISOString(),
-    };
+    try {
+      await createApplication({
+        vacancyId: vacancy.id,
+        coverLetter: coverLetter.trim(),
+      });
 
-    applications.push(application);
-
-    localStorage.setItem(
-      'applications',
-      JSON.stringify(applications)
-    );
-
-    setMessage('Відгук успішно надіслано');
-    setCoverLetter('');
+      setMessage('Відгук успішно надіслано');
+      setCoverLetter('');
+    } catch (err) {
+      setError(err.message || 'Не вдалося надіслати відгук');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -42,27 +39,28 @@ export default function ApplicationForm({ vacancy }) {
       </p>
 
       <p>
-        Компанія: <strong>{vacancy.company}</strong>
+        Компанія: <strong>{vacancy.companyName}</strong>
       </p>
 
       <form onSubmit={handleSubmit}>
         <label>
-          Відгук:
+          Супровідний лист:
           <textarea
             value={coverLetter}
             onChange={(e) => setCoverLetter(e.target.value)}
-            placeholder="Напишіть відгук..."
+            placeholder="Розкажіть, чому вас зацікавила ця вакансія..."
             rows="5"
-            required
+            maxLength={2000}
           />
         </label>
 
-        <button type="submit">
-          Надіслати відгук
+        {error && <p className="error-message">{error}</p>}
+        {message && <p>{message}</p>}
+
+        <button type="submit" disabled={loading}>
+          {loading ? 'Надсилання...' : 'Надіслати відгук'}
         </button>
       </form>
-
-      {message && <p>{message}</p>}
     </section>
   );
 }

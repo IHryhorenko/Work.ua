@@ -20,6 +20,7 @@ import EmployerCabinet from './pages/EmployerCabinet';
 import JobsPage from './pages/JobsPage';
 import VacancyPage from './pages/VacancyPage';
 import CreateVacancyPage from './pages/CreateVacancyPage';
+import MyApplicationsPage from './pages/MyApplicationsPage';
 
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -33,6 +34,7 @@ function DashboardPage() {
       <p><Link to="/employer">Кабінет роботодавця</Link></p>
       <p><Link to="/jobs">Переглянути вакансії</Link></p>
       <p><Link to="/create-vacancy">Створити вакансію</Link></p>
+      <p><Link to="/my-applications">Мої відгуки</Link></p>
     </main>
   );
 }
@@ -70,6 +72,7 @@ export default function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/employer" element={<EmployerCabinet />} />
           <Route path="/create-vacancy" element={<CreateVacancyPage />} />
+          <Route path="/my-applications" element={<MyApplicationsPage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />
