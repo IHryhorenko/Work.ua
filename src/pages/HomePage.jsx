@@ -40,6 +40,14 @@ export default function HomePage() {
           <button onClick={() => navigate('/register')}>
             Реєстрація
           </button>
+
+          <button onClick={() => navigate('/employer/reviews')}>
+            Відгуки роботодавця
+          </button>
+
+          <button onClick={() => navigate('/candidate/reviews')}>
+            Історія відгуків
+          </button>
         </nav>
       </header>
 

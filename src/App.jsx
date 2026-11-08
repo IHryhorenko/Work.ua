@@ -3,8 +3,7 @@ import {
   BrowserRouter,
   Routes,
   Route,
-  Navigate,
-  Outlet,
+  Link,
 } from 'react-router-dom';
 
 import LoginPage from './pages/LoginPage';
@@ -14,6 +13,9 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
 import HomePage from './pages/HomePage';
+
+import EmployerReviewsPage from './pages/EmployerReviewsPage';
+import CandidateReviewsPage from './pages/CandidateReviewsPage';
 
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -30,7 +32,7 @@ function NotFoundPage() {
   return (
     <div>
       <h2>404 - Page not found</h2>
-      <a href="/login">Back to login</a>
+      <Link to="/login">Back to login</Link>
     </div>
   );
 }
@@ -39,6 +41,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public pages */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -63,10 +66,25 @@ export default function App() {
           element={<AuthCallbackPage />}
         />
 
+        {/* Protected pages */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<DashboardPage />} />
+          <Route
+            path="/dashboard"
+            element={<DashboardPage />}
+          />
+
+          <Route
+            path="/employer/reviews"
+            element={<EmployerReviewsPage />}
+          />
+
+          <Route
+            path="/candidate/reviews"
+            element={<CandidateReviewsPage />}
+          />
         </Route>
 
+        {/* 404 */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
