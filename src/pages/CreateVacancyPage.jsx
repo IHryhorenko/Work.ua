@@ -2,9 +2,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createVacancy } from '../services/vacancyService';
+import { useNotification } from '../components/NotificationProvider';
 
 export default function CreateVacancyPage() {
   const navigate = useNavigate();
+  const { notify } = useNotification();
 
   const [form, setForm] = useState({
     title: '',
@@ -21,7 +23,6 @@ export default function CreateVacancyPage() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   // Оновлення значень форми
   function handleChange(e) {
@@ -36,8 +37,6 @@ export default function CreateVacancyPage() {
   // Відправлення вакансії на сервер
   async function handleSubmit(e) {
     e.preventDefault();
-
-    setError('');
 
     const vacancyData = {
       title: form.title.trim(),
@@ -59,13 +58,15 @@ export default function CreateVacancyPage() {
         .filter((skill) => skill !== ''),
     };
 
-    // Перевірка зарплати
     if (
       vacancyData.salaryMin !== null &&
       vacancyData.salaryMax !== null &&
       vacancyData.salaryMin > vacancyData.salaryMax
     ) {
-      setError('Мінімальна зарплата не може бути більшою за максимальну.');
+      notify(
+        'Мінімальна зарплата не може бути більшою за максимальну.',
+        'error'
+      );
       return;
     }
 
@@ -74,15 +75,14 @@ export default function CreateVacancyPage() {
     try {
       const createdVacancy = await createVacancy(vacancyData);
 
-      // Перевірка отриманого ID
       if (!createdVacancy?.id) {
         throw new Error('Сервер не повернув ID створеної вакансії.');
       }
 
-      // Перехід на сторінку створеної вакансії
+      notify('Вакансію успішно створено!', 'success');
       navigate(`/jobs/${createdVacancy.id}`);
     } catch (err) {
-      setError(err.message || 'Не вдалося створити вакансію.');
+      notify(err.message || 'Не вдалося створити вакансію.', 'error');
     } finally {
       setLoading(false);
     }
@@ -242,8 +242,6 @@ export default function CreateVacancyPage() {
             placeholder="Наприклад: C#, SQL, React"
           />
         </label>
-
-        {error && <p className="error-message">{error}</p>}
 
         <button type="submit" disabled={loading}>
           {loading ? 'Створення...' : 'Створити вакансію'}

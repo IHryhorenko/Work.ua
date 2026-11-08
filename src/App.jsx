@@ -23,6 +23,7 @@ import CreateVacancyPage from './pages/CreateVacancyPage';
 import MyApplicationsPage from './pages/MyApplicationsPage';
 
 import ProtectedRoute from './components/ProtectedRoute';
+import NotificationProvider from './components/NotificationProvider';
 
 function DashboardPage() {
   return (
@@ -50,34 +51,36 @@ function NotFoundPage() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <NotificationProvider>
+      <BrowserRouter>
+        <Routes>
 
-        {/* Публічні сторінки */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/verify-email" element={<VerifyEmailPage />} />
-        <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          {/* Публічні сторінки */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
-        {/* Вакансії */}
-        <Route path="/jobs" element={<JobsPage />} />
-        <Route path="/jobs/:id" element={<VacancyPage />} />
+          {/* Вакансії */}
+          <Route path="/jobs" element={<JobsPage />} />
+          <Route path="/jobs/:id" element={<VacancyPage />} />
 
-        {/* Захищені сторінки */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/employer" element={<EmployerCabinet />} />
-          <Route path="/create-vacancy" element={<CreateVacancyPage />} />
-          <Route path="/my-applications" element={<MyApplicationsPage />} />
-        </Route>
+          {/* Захищені сторінки */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/employer" element={<EmployerCabinet />} />
+            <Route path="/create-vacancy" element={<CreateVacancyPage />} />
+            <Route path="/my-applications" element={<MyApplicationsPage />} />
+          </Route>
 
-        <Route path="*" element={<NotFoundPage />} />
+          <Route path="*" element={<NotFoundPage />} />
 
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </NotificationProvider>
   );
 }

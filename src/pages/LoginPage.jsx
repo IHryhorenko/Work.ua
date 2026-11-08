@@ -2,27 +2,27 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../services/authService';
+import { useNotification } from '../components/NotificationProvider';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { notify } = useNotification();
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setMessage('');
     setLoading(true);
 
     try {
       await login(email, password);
 
-      setMessage('Login successful!');
+      notify('Login successful!', 'success');
       navigate('/');
     } catch (err) {
-      setMessage(err.message);
+      notify(err.message || 'Login failed.', 'error');
     } finally {
       setLoading(false);
     }
@@ -31,16 +31,6 @@ export default function LoginPage() {
   return (
     <div style={{ maxWidth: '350px' }}>
       <h2>Log in</h2>
-
-      {message && (
-        <p
-          style={{
-            color: message === 'Login successful!' ? 'green' : 'red',
-          }}
-        >
-          {message}
-        </p>
-      )}
 
       <form
         onSubmit={handleLogin}
