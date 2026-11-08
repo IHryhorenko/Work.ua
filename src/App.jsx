@@ -1,3 +1,4 @@
+
 import {
   BrowserRouter,
   Routes,
@@ -14,6 +15,7 @@ import VerifyEmailPage from './pages/VerifyEmailPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
+import EmployerCabinet from './pages/EmployerCabinet';
 
 import JobsPage from './pages/JobsPage';
 import VacancyPage from './pages/VacancyPage';
@@ -26,7 +28,9 @@ function DashboardPage() {
     <main className="dashboard-page">
       <h1>Work.ua</h1>
       <p>You are viewing the protected area.</p>
+
       <p><Link to="/profile">Мій профіль</Link></p>
+      <p><Link to="/employer">Кабінет роботодавця</Link></p>
       <p><Link to="/jobs">Переглянути вакансії</Link></p>
       <p><Link to="/create-vacancy">Створити вакансію</Link></p>
     </main>
@@ -45,29 +49,32 @@ function NotFoundPage() {
 export default function App() {
   return (
     <BrowserRouter>
-  <Routes>
-    {/* Публічні сторінки */}
-    <Route path="/" element={<HomePage />} />
-    <Route path="/login" element={<LoginPage />} />
-    <Route path="/register" element={<RegisterPage />} />
-    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-    <Route path="/reset-password" element={<ResetPasswordPage />} />
-    <Route path="/verify-email" element={<VerifyEmailPage />} />
-    <Route path="/auth/callback" element={<AuthCallbackPage />} />
+      <Routes>
 
-    {/* Вакансії */}
-    <Route path="/jobs" element={<JobsPage />} />
-    <Route path="/jobs/:id" element={<VacancyPage />} />
+        {/* Публічні сторінки */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
-    {/* Захищені сторінки */}
-    <Route element={<ProtectedRoute />}>
-      <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/profile" element={<ProfilePage />} />
-      <Route path="/create-vacancy" element={<CreateVacancyPage />} />
-    </Route>
+        {/* Вакансії */}
+        <Route path="/jobs" element={<JobsPage />} />
+        <Route path="/jobs/:id" element={<VacancyPage />} />
 
-    <Route path="*" element={<NotFoundPage />} />
-  </Routes>
-</BrowserRouter>
+        {/* Захищені сторінки */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/employer" element={<EmployerCabinet />} />
+          <Route path="/create-vacancy" element={<CreateVacancyPage />} />
+        </Route>
+
+        <Route path="*" element={<NotFoundPage />} />
+
+      </Routes>
+    </BrowserRouter>
   );
 }
