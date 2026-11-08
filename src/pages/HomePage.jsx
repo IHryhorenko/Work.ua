@@ -62,26 +62,6 @@ export default function HomePage() {
           Шукай вакансії та знаходь нові можливості для кар'єри
         </p>
 
-        <form onSubmit={handleSearch}>
-          <input
-            type="text"
-            placeholder="Посада або ключові слова"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-
-          <input
-            type="text"
-            placeholder="Місто"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-          />
-
-          <button type="submit">
-            Знайти вакансії
-          </button>
-        </form>
-
         <button onClick={() => navigate('/jobs')}>
           Переглянути всі вакансії
         </button>
