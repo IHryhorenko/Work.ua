@@ -1,50 +1,42 @@
+
 import { apiRequest } from './api';
 
 // Отримання списку вакансій із фільтрами
 export async function getVacancies(filters = {}) {
   const params = new URLSearchParams();
 
-  // Пошук за назвою вакансії або компанією
   if (filters.search?.trim()) {
     params.set('Search', filters.search.trim());
   }
 
-  // Місто
   if (filters.city?.trim()) {
     params.set('City', filters.city.trim());
   }
 
-  // Тип зайнятості
-  if (filters.employmentType !== '') {
+  if (filters.employmentType !== undefined && filters.employmentType !== '') {
     params.set('EmploymentType', filters.employmentType);
   }
 
-  // Формат роботи
-  if (filters.workMode !== '') {
+  if (filters.workMode !== undefined && filters.workMode !== '') {
     params.set('WorkMode', filters.workMode);
   }
 
-  // Мінімальна зарплата
-  if (filters.salaryFrom !== '') {
+  if (filters.salaryFrom !== undefined && filters.salaryFrom !== '') {
     params.set('SalaryFrom', filters.salaryFrom);
   }
 
-  // Валюта
-  if (filters.currency !== '') {
+  if (filters.currency !== undefined && filters.currency !== '') {
     params.set('Currency', filters.currency);
   }
 
-  // Категорія
-  if (filters.category !== '') {
+  if (filters.category !== undefined && filters.category !== '') {
     params.set('Category', filters.category);
   }
 
-  // Досвід роботи
-  if (filters.experienceLevel !== '') {
+  if (filters.experienceLevel !== undefined && filters.experienceLevel !== '') {
     params.set('ExperienceLevel', filters.experienceLevel);
   }
 
-  // Навички
   if (filters.skills?.trim()) {
     filters.skills.split(',').forEach((skill) => {
       const value = skill.trim();
@@ -55,7 +47,6 @@ export async function getVacancies(filters = {}) {
     });
   }
 
-  // Сортування
   if (filters.sortBy !== undefined) {
     params.set('SortBy', filters.sortBy);
   }
@@ -64,7 +55,6 @@ export async function getVacancies(filters = {}) {
     params.set('Desc', filters.desc);
   }
 
-  // Пагінація
   params.set('Page', filters.page || 1);
   params.set('PageSize', filters.pageSize || 10);
 
@@ -73,9 +63,51 @@ export async function getVacancies(filters = {}) {
   });
 }
 
-// Отримання конкретної вакансії
+// Отримання вакансії за ID
 export async function getVacancyById(id) {
   return apiRequest(`/Vacancy/${id}`, {
     method: 'GET',
+  });
+}
+
+// Створення вакансії
+export async function createVacancy(vacancyData) {
+  return apiRequest('/Vacancy', {
+    method: 'POST',
+    body: JSON.stringify(vacancyData),
+  });
+}
+
+// Отримання власних вакансій роботодавця
+export async function getMyVacancies(filters = {}) {
+  const params = new URLSearchParams();
+
+  params.set('Page', filters.page || 1);
+  params.set('PageSize', filters.pageSize || 10);
+
+  return apiRequest(`/Vacancy/my?${params.toString()}`, {
+    method: 'GET',
+  });
+}
+
+// Публікація вакансії
+export async function publishVacancy(id) {
+  return apiRequest(`/Vacancy/${id}/publish`, {
+    method: 'POST',
+  });
+}
+
+// Закриття вакансії
+export async function closeVacancy(id) {
+  return apiRequest(`/Vacancy/${id}/close`, {
+    method: 'POST',
+  });
+}
+
+// Оновлення вакансії
+export async function updateVacancy(id, vacancyData) {
+  return apiRequest(`/Vacancy/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(vacancyData),
   });
 }
