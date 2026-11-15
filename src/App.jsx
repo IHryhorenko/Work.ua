@@ -3,7 +3,6 @@ import {
   BrowserRouter,
   Routes,
   Route,
-  Navigate,
   Link,
 } from 'react-router-dom';
 
@@ -21,6 +20,9 @@ import JobsPage from './pages/JobsPage';
 import VacancyPage from './pages/VacancyPage';
 import CreateVacancyPage from './pages/CreateVacancyPage';
 import MyApplicationsPage from './pages/MyApplicationsPage';
+
+import EmployerReviewsPage from './pages/EmployerReviewsPage';
+import CandidateReviewsPage from './pages/CandidateReviewsPage';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import NotificationProvider from './components/NotificationProvider';
@@ -54,11 +56,11 @@ export default function App() {
     <NotificationProvider>
       <BrowserRouter>
         <Routes>
-
           {/* Публічні сторінки */}
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/verify-email" element={<VerifyEmailPage />} />
@@ -73,10 +75,13 @@ export default function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/employer" element={<EmployerCabinet />} />
+            <Route path="/employer/reviews" element={<EmployerReviewsPage />} />
+            <Route path="/candidate/reviews" element={<CandidateReviewsPage />} />
             <Route path="/create-vacancy" element={<CreateVacancyPage />} />
             <Route path="/my-applications" element={<MyApplicationsPage />} />
           </Route>
 
+          {/* 404 */}
           <Route path="*" element={<NotFoundPage />} />
 
         </Routes>
