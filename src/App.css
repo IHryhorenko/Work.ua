@@ -852,3 +852,121 @@
   .home-search .primary-pill { flex-basis: 48px; width: 100%; }
   .home-actions { flex-direction: column; width: min(100%, 280px); }
 }
+
+.auth-page.auth-register {
+  min-height: 100vh;
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.auth-register .auth-split {
+  min-height: 100vh;
+  height: auto;
+}
+
+.auth-register .auth-panel {
+  min-height: 100vh;
+  height: auto;
+}
+
+.auth-register .auth-form-panel {
+  align-items: flex-start;
+}
+
+.auth-register .auth-form-wrap {
+  margin: 0 auto;
+  padding-bottom: 40px;
+}
+
+.auth-register .auth-form {
+  gap: 18px;
+}
+
+@media (max-width: 650px) {
+  .auth-register .auth-panel {
+    min-height: auto;
+  }
+
+  .auth-register .auth-form-panel {
+    padding-top: 35px;
+    padding-bottom: 45px;
+  }
+
+  .auth-register .auth-promo-panel {
+    min-height: 350px;
+  }
+}
+
+.candidate-dashboard {
+  min-height: 100vh;
+  background: #f6f8f1;
+  color: #193b20;
+}
+
+.candidate-dashboard-header {
+  min-height: 76px;
+  padding: 0 5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border-bottom: 1px solid #e5ebdc;
+}
+
+.candidate-dashboard-brand {
+  border: 0;
+  background: transparent;
+  color: #9dce20;
+  font-size: 24px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.candidate-dashboard-content {
+  width: min(1100px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 55px 0;
+}
+
+.candidate-dashboard-content > h1 {
+  margin: 0 0 10px;
+  font-size: 34px;
+}
+
+.candidate-dashboard-content > p {
+  color: #687565;
+}
+
+.candidate-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  margin-top: 35px;
+}
+
+.candidate-dashboard-card {
+  padding: 28px;
+  border: 1px solid #e5ebdc;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.candidate-dashboard-card h2 {
+  margin: 18px 0;
+}
+
+.candidate-dashboard-card p {
+  color: #687565;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 650px) {
+  .candidate-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .candidate-dashboard-content > h1 {
+    font-size: 27px;
+  }
+}

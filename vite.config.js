@@ -1,3 +1,4 @@
+
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
@@ -6,8 +7,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5132', // Адреса бекенду, до якого фронтенд надсилає API-запити
+        target: 'https://jobportal-pl-api.azurewebsites.net',
         changeOrigin: true,
+        secure: true,
       },
     },
   },

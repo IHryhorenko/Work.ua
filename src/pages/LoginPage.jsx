@@ -1,6 +1,7 @@
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { login } from '../services/authService';
+import { login, getCurrentUser } from '../services/authService';
 import GoogleLoginButton from '../components/GoogleLoginButton';
 import AuthLayout from '../components/AuthLayout';
 
@@ -10,6 +11,7 @@ export default function LoginPage() {
   const [remember, setRemember] = useState(false);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const handleLogin = async (event) => {
@@ -19,8 +21,29 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-      navigate('/', { replace: true });
+
+      const userData = await getCurrentUser();
+
+      const user =
+        userData?.user ||
+        userData?.data?.user ||
+        userData?.data ||
+        userData;
+
+      const role = String(user?.role ?? '').toLowerCase();
+      const isEmployer =
+        role === 'employer' ||
+        role === 'company' ||
+        Boolean(user?.companyId);
+
+      if (isEmployer) {
+        navigate('/employer/reviews', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     } catch (error) {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
       setMessage(error.message);
     } finally {
       setLoading(false);
@@ -36,14 +59,28 @@ export default function LoginPage() {
             <p className="auth-subtitle">Увійдіть, щоб продовжити</p>
 
             <div className="social-buttons">
-              <button type="button" className="social-button" aria-label="Facebook" title="Facebook">f</button>
+              <button
+                type="button"
+                className="social-button"
+                aria-label="Facebook"
+                title="Facebook"
+              >
+                f
+              </button>
               <GoogleLoginButton />
             </div>
 
-            {message && <p className="form-message" role="alert">{message}</p>}
+            {message && (
+              <p className="form-message" role="alert">
+                {message}
+              </p>
+            )}
 
             <form className="auth-form" onSubmit={handleLogin}>
-              <label className="visually-hidden" htmlFor="login-email">Email</label>
+              <label className="visually-hidden" htmlFor="login-email">
+                Email
+              </label>
+
               <input
                 id="login-email"
                 type="email"
@@ -54,7 +91,10 @@ export default function LoginPage() {
                 required
               />
 
-              <label className="visually-hidden" htmlFor="login-password">Пароль</label>
+              <label className="visually-hidden" htmlFor="login-password">
+                Пароль
+              </label>
+
               <input
                 id="login-password"
                 type="password"
@@ -67,13 +107,22 @@ export default function LoginPage() {
 
               <div className="form-options">
                 <label className="remember-option">
-                  <input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} />
+                  <input
+                    type="checkbox"
+                    checked={remember}
+                    onChange={(event) => setRemember(event.target.checked)}
+                  />
                   <span>Запам’ятати мене</span>
                 </label>
+
                 <Link to="/forgot-password">Забули пароль?</Link>
               </div>
 
-              <button className="pill-button primary-pill" type="submit" disabled={loading}>
+              <button
+                className="pill-button primary-pill"
+                type="submit"
+                disabled={loading}
+              >
                 {loading ? 'Зачекайте…' : 'Увійти'}
               </button>
             </form>
@@ -84,12 +133,20 @@ export default function LoginPage() {
           <div className="promo-content">
             <h2>Ще не з нами?</h2>
             <p>
-              Тоді саме час це виправити!<br />
-              Створюй акаунт у JellyJob, відкривай цікаві<br className="desktop-break" />
-              вакансії та знаходь можливості, які приведуть<br className="desktop-break" />
+              Тоді саме час це виправити!
+              <br />
+              Створюй акаунт у JellyJob, відкривай цікаві
+              <br className="desktop-break" />
+              вакансії та знаходь можливості, які приведуть
+              <br className="desktop-break" />
               тебе до роботи мрії.
             </p>
-            <button className="pill-button outline-pill" type="button" onClick={() => navigate('/choose-role')}>
+
+            <button
+              className="pill-button outline-pill"
+              type="button"
+              onClick={() => navigate('/choose-role')}
+            >
               Зареєструватися
             </button>
           </div>

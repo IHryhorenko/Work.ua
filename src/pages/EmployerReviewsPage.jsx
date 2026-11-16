@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { getCurrentUser } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 
 export default function EmployerReviewsPage() {
@@ -6,6 +7,58 @@ export default function EmployerReviewsPage() {
 
   const [filter, setFilter] = useState('all');
   const [reviews, setReviews] = useState([]);
+  const [user, setUser] = useState(null);
+  const [profileName, setProfileName] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+
+    getCurrentUser()
+      .then((data) => {
+        if (!active) return;
+        setUser(data?.user || data?.data?.user || data?.data || data);
+      })
+      .catch((err) => {
+        if (active) setError(err.message || 'Не вдалося завантажити профіль.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+
+        const response = await fetch('/api/Account/me', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Не вдалося отримати профіль');
+        }
+
+        const user = await response.json();
+
+        const name = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+
+        setProfileName(name || user.email || '');
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadProfile();
+  }, []);
 
   const filteredReviews = useMemo(() => {
     if (filter === 'all') return reviews;
@@ -40,11 +93,14 @@ export default function EmployerReviewsPage() {
         </button>
 
         <div className="profile-name">
-          Kedryk Kostia
+          {profileName}
         </div>
       </header>
 
       <main className="reviews-container">
+        {loading && <p>Завантаження профілю...</p>}
+        {error && <div className="empty-state">{error}</div>}
+
         <button
           className="back-link"
           onClick={() => navigate('/')}

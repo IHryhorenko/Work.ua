@@ -1,4 +1,5 @@
-const API_URL = `${import.meta.env.VITE_API_URL}/api`;
+
+const API_URL = '/api';
 
 async function request(endpoint, options = {}) {
   let response;
@@ -6,10 +7,11 @@ async function request(endpoint, options = {}) {
   try {
     response = await fetch(`${API_URL}${endpoint}`, {
       ...options,
-      // Не використовуємо cookies, оскільки бекенд повертає JWT-токени.
-      // credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
+        ...(localStorage.getItem('accessToken')
+          ? { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+          : {}),
         ...options.headers,
       },
     });
@@ -29,46 +31,109 @@ async function request(endpoint, options = {}) {
   }
 
   if (!response.ok) {
+    const validationErrors = data?.errors
+      ? Object.values(data.errors).flat().join(' ')
+      : null;
+
     throw new Error(
-      data?.message || data?.error || 'Something went wrong.'
+      validationErrors ||
+      data?.detail ||
+      data?.message ||
+      data?.title ||
+      data?.error ||
+      'Something went wrong.'
     );
   }
 
   return data;
 }
 
-export function login(email, password) {
-  return request('/Auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
-  });
-}
-
-export function register(email, password, role) {
-  if (role === 'employer') {
-    throw new Error(
-      'Employer registration requires company and personal details.'
-    );
-  }
-
-  return request('/Auth/register/candidate', {
+// LOGIN
+export async function login(email, password) {
+  const data = await request('/Auth/login', {
     method: 'POST',
     body: JSON.stringify({
-      email,
+      email: email.trim(),
       password,
-      firstName: '',
-      lastName: '',
+    }),
+  });
+
+  const accessToken =
+    data?.accessToken ||
+    data?.token ||
+    data?.access_token ||
+    data?.data?.accessToken;
+
+  const refreshToken =
+    data?.refreshToken ||
+    data?.refresh_token ||
+    data?.data?.refreshToken;
+
+  if (!accessToken) {
+    throw new Error('Сервер не повернув access token.');
+  }
+
+  localStorage.setItem('accessToken', accessToken);
+
+  if (refreshToken) {
+    localStorage.setItem('refreshToken', refreshToken);
+  }
+
+  return data;
+}
+
+// REGISTER CANDIDATE / EMPLOYER
+export function register(
+  email,
+  password,
+  role,
+  firstName,
+  lastName,
+  companyName = '',
+  companyWebsite = '',
+  companyDescription = ''
+) {
+  const isEmployer = role === 'employer';
+
+  const body = {
+    email: email.trim(),
+    password,
+    firstName: firstName.trim(),
+    lastName: lastName.trim(),
+  };
+
+  if (isEmployer) {
+    body.companyName = companyName.trim();
+    body.companyWebsite = companyWebsite.trim();
+    body.companyDescription = companyDescription.trim();
+  }
+
+  if (isEmployer && !body.companyName) {
+    return Promise.reject(new Error('Вкажіть назву компанії.'));
+  }
+
+  return request(
+    isEmployer
+      ? '/Auth/register/employer'
+      : '/Auth/register/candidate',
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }
+  );
+}
+
+// FORGOT PASSWORD
+export function forgotPassword(email) {
+  return request('/Auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({
+      email: email.trim(),
     }),
   });
 }
 
-export function forgotPassword(email) {
-  return request('/Auth/forgot-password', {
-    method: 'POST',
-    body: JSON.stringify({ email }),
-  });
-}
-
+// RESET PASSWORD
 export function resetPassword(token, password) {
   return request('/Auth/reset-password', {
     method: 'POST',
@@ -79,6 +144,7 @@ export function resetPassword(token, password) {
   });
 }
 
+// EMAIL VERIFICATION
 export function verifyEmail(token) {
   return Promise.reject(
     new Error('Email verification is not implemented in the backend.')
@@ -91,17 +157,12 @@ export function resendVerification(email) {
   );
 }
 
+// GET CURRENT USER
 export function getCurrentUser() {
-  const token = localStorage.getItem('accessToken');
-
-  return request('/Account/me', {
-    method: 'GET',
-    headers: token
-      ? { Authorization: `Bearer ${token}` }
-      : {},
-  });
+  return request('/Account/me', { method: 'GET' });
 }
 
+// LOGOUT
 export async function logout() {
   const refreshToken = localStorage.getItem('refreshToken');
 

@@ -1,5 +1,5 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ChooseRolePage from './pages/ChooseRolePage';
@@ -10,18 +10,10 @@ import AuthCallbackPage from './pages/AuthCallbackPage';
 import HomePage from './pages/HomePage';
 import EmployerReviewsPage from './pages/EmployerReviewsPage';
 import CandidateReviewsPage from './pages/CandidateReviewsPage';
+import CandidateDashboardPage from './pages/CandidateDashboardPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 import './App.css';
-
-function DashboardPage() {
-  return (
-    <div className="simple-page">
-      <h1>JellyJob</h1>
-      <p>Ви увійшли в захищений розділ.</p>
-    </div>
-  );
-}
 
 function NotFoundPage() {
   return (
@@ -46,7 +38,7 @@ export default function App() {
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
         <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/dashboard" element={<CandidateDashboardPage />} />
           <Route path="/employer/reviews" element={<EmployerReviewsPage />} />
           <Route path="/candidate/reviews" element={<CandidateReviewsPage />} />
         </Route>
